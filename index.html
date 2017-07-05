@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/index.css"/>
+</head>
+<body>
+    <div class="select_div_1">
+    <div class="header_div">
+        <div class="content">请选择</div>
+        <div class="arrow" status="off"></div>
+    </div>
+    <ul class="list"></ul>
+</div>
+    <script>
+        function addEvent(ele, type, fun) {
+            if (ele.addEventListener) {
+                ele.addEventListener(type, fun, false);
+            } else if (ele.attachEvent) {
+                ele.attachEvent(type, fun);
+            }
+        }
+        function targets(e) {
+            e = e || window.event;
+            if (e.target) {
+                return e.target;
+            } else {
+                return e.srcElement;
+            }
+        }
+        ;(function(){
+            function ajax(type, url, flag, callback) {
+                var xhr = new XMLHttpRequest();
+                if (flag) { // true asynchronize（异步）
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4) {
+                            deal();
+                        }
+                    };
+                    xhr.open(type, url, true);
+                    xhr.send(null);
+                } else { // false synchronize（同步）
+                    xhr.open(type, url, false);
+                    xhr.send(null);
+                    deal();
+                }
+                function deal() {
+                    if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                        callback(xhr.responseText);
+                    } else {
+                        alert("Request was unsuccessful: " + xhr.status);
+                    }
+                }
+            }
+            var doc = document,
+                select_div_1 = doc.querySelector(".select_div_1");
+                  ajax("get", "json/city1.json", true, function(data){
+                dataObj = JSON.parse(data) ;
+                fillList(select_div_1, dataObj);
+                var temp = JSON.parse(data);
+                dataObj = temp;
+                fillList(select_div_1, temp);
+            });
+            function fillList(ele, data) {
+//                console.log(data)
+                var len = data.length,
+                        str = '',
+                        list = ele.querySelector(".list");
+                if (len === 0) {
+                    list.innerHTML = "";
+                } else {
+                    for (var i = 1; i < len; i++) {
+                        str += '<li>' + data[i].name + '</li>';
+                    }
+                    list.innerHTML = str;
+                }
+            }
+            function clickEvent(e) {
+                var target = targets(e),
+                        cN = target.className,
+                        status = target.getAttribute("status"),
+                        temp = null,
+                        temp2 = null,
+                        temp3 = target.parentNode.parentNode;
+                        console.log(temp3)
+                console.log(cN)
+                // 点击的是箭头且其status值为off
+                if (cN === "arrow" && status === "off") {
+                    if (temp3.querySelector(".list").innerHTML.toString().length > 0) {
+                        temp3.querySelector(".list").style.display = "block";
+                        target.setAttribute("status", "on");
+//                        closeOtherList(temp3);
+                    } else {
+                        alert("该下拉框暂时没有数据");
+                    }
+                    // 点击的是箭头且其status值为on
+                } else if (cN === "arrow" && status === "on") {
+                    temp3.querySelector(".list").style.display = "none";
+                    target.setAttribute("status", "off");
+                    // 点击的是list中的li
+                } else if (target.tagName.toUpperCase() === "LI") {
+                    temp = target.innerHTML;
+                    temp3.querySelector(".content").innerHTML = temp;
+                    temp3.querySelector(".list").style.display = "none";
+                    temp3.querySelector(".arrow").setAttribute("status", "off");
+//                    changeValue(temp3);
+                    // 如果在第1个下拉框里点击li
+                }
+                else if (cN === "content") {
+                    return;
+                } else { // 点击的不是下拉框里的任何元素，则关闭所有list
+//                    closeOtherList("closeAll", true)
+                }
+            }
+            addEvent(doc,"click",clickEvent);
+        }());
+    </script>
+</body>
+</html>
